@@ -1,0 +1,32 @@
+{
+  "name": "apc40-midi",
+  "version": "0.1.0",
+  "description": "Node.js module for Akai APC40 MIDI controller",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "example": "node examples/basic.js"
+  },
+  "keywords": [
+    "apc40",
+    "midi",
+    "akai",
+    "controller",
+    "music"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "easymidi": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  }
+}
