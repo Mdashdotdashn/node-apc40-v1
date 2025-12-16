@@ -13,7 +13,6 @@ import {
 
 export interface APC40Options {
   deviceName?: string;
-  mode?: APC40Mode;
   autoConnect?: boolean;
 }
 
@@ -31,18 +30,20 @@ export interface ControllerEvent {
 
 /**
  * Main APC40 controller class
+ * 
+ * NOTE: Always uses GENERIC mode to avoid Ableton's automatic handling
+ * which could cause unexpected behavior. See initialize() method.
  */
 export class APC40 extends EventEmitter {
   private input?: midi.Input;
   private output?: midi.Output;
   private deviceName: string;
-  private mode: APC40Mode;
+  private readonly mode: APC40Mode = APC40Mode.GENERIC;
   private isConnected: boolean = false;
 
   constructor(options: APC40Options = {}) {
     super();
     this.deviceName = options.deviceName || 'APC40';
-    this.mode = options.mode || APC40Mode.GENERIC;
 
     if (options.autoConnect !== false) {
       this.connect();
