@@ -8,14 +8,26 @@ console.log('Connecting to APC40...\n');
 
 const apc = new APC40({ autoConnect: false });
 
+// Track clip launch button states for toggling
+const clipLaunchStates = new Map();
+
 apc.on('connected', () => {
   console.log('✓ Connected to APC40');
-  console.log('Press the STOP button to exit.\n');
+  console.log('Press the STOP button to exit.');
+  console.log('Press clip launch buttons to toggle them on/off.\n');
 
-  // Light up clip launch buttons
+  // Light up clip launch buttons at startup
   apc.setClipLED(LED_NOTES.CLIP_LAUNCH_1, ClipLEDColor.GREEN);
   apc.setClipLED(LED_NOTES.CLIP_LAUNCH_2, ClipLEDColor.RED);
   apc.setClipLED(LED_NOTES.CLIP_LAUNCH_3, ClipLEDColor.YELLOW);
+  
+  // Initialize state tracking for startup LEDs
+  for (let channel = 0; channel < 8; channel++) {
+    const key = `${LED_NOTES.CLIP_LAUNCH_1}-${channel}`;
+    if (channel === 0) clipLaunchStates.set(`${LED_NOTES.CLIP_LAUNCH_1}-0`, true);
+    if (channel === 0) clipLaunchStates.set(`${LED_NOTES.CLIP_LAUNCH_2}-0`, true);
+    if (channel === 0) clipLaunchStates.set(`${LED_NOTES.CLIP_LAUNCH_3}-0`, true);
+  }
 
   // Light up some activator/solo/record arm buttons at startup
   // Channel 0 (track 1)
@@ -45,9 +57,22 @@ apc.on('button-down', (event) => {
     process.exit(0);
   }
 
-  // Light up clip launch buttons when pressed
+  // Toggle clip launch buttons - turn on if off, turn off if on
   if (event.note >= INPUT_NOTES.CLIP_LAUNCH_1 && event.note <= INPUT_NOTES.CLIP_LAUNCH_5) {
-    apc.setClipLED(event.note, ClipLEDColor.GREEN, event.channel);
+    const stateKey = `${event.note}-${event.channel}`;
+    const isLit = clipLaunchStates.get(stateKey);
+    
+    if (isLit) {
+      // Turn off
+      apc.setClipLED(event.note, ClipLEDColor.OFF, event.channel);
+      clipLaunchStates.set(stateKey, false);
+      console.log(`  → Clip OFF`);
+    } else {
+      // Turn on
+      apc.setClipLED(event.note, ClipLEDColor.GREEN, event.channel);
+      clipLaunchStates.set(stateKey, true);
+      console.log(`  → Clip ON`);
+    }
   }
 });
 
@@ -55,7 +80,7 @@ apc.on('button-up', (event) => {
   const buttonName = getButtonName(event.note);
   console.log(`Button released: ${buttonName} (0x${event.note.toString(16)})`);
   
-  // Don't turn off clip launch buttons - they should stay lit as indicators
+  // Don't turn off clip launch buttons - they maintain their toggled state
   // Only turn off other momentary buttons
   if (!(event.note >= INPUT_NOTES.CLIP_LAUNCH_1 && event.note <= INPUT_NOTES.CLIP_LAUNCH_5)) {
     apc.setClipLED(event.note, ClipLEDColor.OFF, event.channel);
