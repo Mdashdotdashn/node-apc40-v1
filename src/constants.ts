@@ -154,3 +154,38 @@ export const INPUT_NOTES = {
   NUDGE_PLUS: 0x64,
   NUDGE_MINUS: 0x65,
 };
+
+/**
+ * Helper function to get button name from note number
+ */
+export function getButtonName(note: number): string {
+  for (const [name, value] of Object.entries(INPUT_NOTES)) {
+    if (value === note) {
+      return name;
+    }
+  }
+  return `UNKNOWN (0x${note.toString(16).toUpperCase()})`;
+}
+
+/**
+ * Helper function to get controller name from controller ID
+ */
+export function getControllerName(controllerId: number, channel?: number): string {
+  // Check absolute controllers
+  for (const [name, value] of Object.entries(CONTROLLER_IDS)) {
+    if (value === controllerId) {
+      // Add channel info for banked controllers
+      if (channel !== undefined) {
+        if (controllerId === CONTROLLER_IDS.TRACK_LEVEL) {
+          return `TRACK_LEVEL_${channel + 1}`;
+        } else if (controllerId >= 0x10 && controllerId <= 0x17) {
+          // Device knobs
+          const knobNum = controllerId - 0x10 + 1;
+          return `DEVICE_KNOB_${knobNum}`;
+        }
+      }
+      return name;
+    }
+  }
+  return `UNKNOWN (0x${controllerId.toString(16).toUpperCase()})`;
+}

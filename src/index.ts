@@ -9,5 +9,7 @@ export {
   INPUT_NOTES,
   PROTOCOL,
   MESSAGE_TYPES,
+  getButtonName,
+  getControllerName,
 } from './constants';
 export * from './utils';

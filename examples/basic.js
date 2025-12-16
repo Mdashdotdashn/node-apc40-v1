@@ -2,7 +2,7 @@
  * Basic example of using the APC40 module
  */
 
-const { APC40, LED_NOTES, ClipLEDColor, CONTROLLER_IDS } = require('../lib');
+const { APC40, LED_NOTES, ClipLEDColor, CONTROLLER_IDS, INPUT_NOTES, getButtonName, getControllerName } = require('../lib');
 
 console.log('Connecting to APC40...\n');
 
@@ -12,10 +12,22 @@ apc.on('connected', () => {
   console.log('✓ Connected to APC40');
   console.log('Press the STOP button to exit.\n');
 
-  // Light up a few buttons
+  // Light up clip launch buttons
   apc.setClipLED(LED_NOTES.CLIP_LAUNCH_1, ClipLEDColor.GREEN);
   apc.setClipLED(LED_NOTES.CLIP_LAUNCH_2, ClipLEDColor.RED);
   apc.setClipLED(LED_NOTES.CLIP_LAUNCH_3, ClipLEDColor.YELLOW);
+
+  // Light up some activator/solo/record arm buttons at startup
+  // Channel 0 (track 1)
+  apc.setLED(LED_NOTES.ACTIVATOR, ClipLEDColor.GREEN, 0);
+  apc.setLED(LED_NOTES.SOLO, ClipLEDColor.RED, 0);
+
+  // Channel 2 (track 3)
+  apc.setLED(LED_NOTES.RECORD_ARM, ClipLEDColor.YELLOW, 2);
+  apc.setLED(LED_NOTES.ACTIVATOR, ClipLEDColor.GREEN, 2);
+
+  // Channel 4 (track 5)
+  apc.setLED(LED_NOTES.RECORD_ARM, ClipLEDColor.RED, 4);
 
   // Set master level
   apc.setController(CONTROLLER_IDS.MASTER_LEVEL, 100);
@@ -23,30 +35,38 @@ apc.on('connected', () => {
 
 // Listen for button presses
 apc.on('button-down', (event) => {
-  console.log(`Button pressed - Note: 0x${event.note.toString(16)}, Channel: ${event.channel}`);
+  const buttonName = getButtonName(event.note);
+  console.log(`Button pressed: ${buttonName} (0x${event.note.toString(16)}), Channel: ${event.channel}`);
 
-  // Exit on STOP button (0x5c)
-  if (event.note === 0x5c) {
+  // Exit on STOP button
+  if (event.note === INPUT_NOTES.STOP) {
     console.log('\nStop button pressed. Exiting...');
     apc.disconnect();
     process.exit(0);
   }
 
-  // Try to toggle LED on button press (only for clip launch buttons 0x35-0x39)
-  if (event.note >= 0x35 && event.note <= 0x39) {
+  // Light up clip launch buttons when pressed
+  if (event.note >= INPUT_NOTES.CLIP_LAUNCH_1 && event.note <= INPUT_NOTES.CLIP_LAUNCH_5) {
     apc.setClipLED(event.note, ClipLEDColor.GREEN, event.channel);
   }
 });
 
 apc.on('button-up', (event) => {
-  console.log(`Button released - Note: 0x${event.note.toString(16)}`);
-  apc.setClipLED(event.note, ClipLEDColor.OFF);
+  const buttonName = getButtonName(event.note);
+  console.log(`Button released: ${buttonName} (0x${event.note.toString(16)})`);
+  
+  // Don't turn off clip launch buttons - they should stay lit as indicators
+  // Only turn off other momentary buttons
+  if (!(event.note >= INPUT_NOTES.CLIP_LAUNCH_1 && event.note <= INPUT_NOTES.CLIP_LAUNCH_5)) {
+    apc.setClipLED(event.note, ClipLEDColor.OFF, event.channel);
+  }
 });
 
 // Listen for knob/fader changes
 apc.on('controller', (event) => {
+  const controllerName = getControllerName(event.controlId, event.channel);
   console.log(
-    `Controller changed - ID: 0x${event.controlId.toString(16)}, Value: ${event.value}, Channel: ${event.channel}`
+    `Controller changed: ${controllerName}, Value: ${event.value}, Channel: ${event.channel}`
   );
 });
 

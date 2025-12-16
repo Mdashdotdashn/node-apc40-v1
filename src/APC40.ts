@@ -78,6 +78,11 @@ export class APC40 extends EventEmitter {
         this.handleNoteOff(msg);
       });
 
+      // Setup input handler for CC (control change) messages
+      (this.input as any).on('cc', (msg: any) => {
+        this.handleControlChange(msg);
+      });
+
       this.isConnected = true;
       this.initialize();
       this.emit('connected');
@@ -166,6 +171,21 @@ export class APC40 extends EventEmitter {
       velocity,
       channel,
     } as ButtonEvent);
+  }
+
+  /**
+   * Handle CC (control change) message
+   */
+  private handleControlChange(msg: any): void {
+    const controlId = msg.controller ?? 0;
+    const value = msg.value ?? 0;
+    const channel = msg.channel ?? 0;
+
+    this.emit('controller', {
+      controlId,
+      value,
+      channel,
+    } as ControllerEvent);
   }
 
   /**
