@@ -90,6 +90,7 @@ export class APC40 extends EventEmitter {
 
       this.isConnected = true;
       this.initialize();
+      this.resetToDefaults();
       this.emit('connected');
 
       return true;
@@ -97,6 +98,99 @@ export class APC40 extends EventEmitter {
       this.emit('error', error);
       return false;
     }
+  }
+
+  /**
+   * Reset device to default state: turn off all LEDs and set all controllers to 0
+   */
+  private resetToDefaults(): void {
+    if (!this.output) {
+      return;
+    }
+
+    // Turn off all LEDs (0x30 to 0x65 covers all LED notes)
+    for (let note = 0x30; note <= 0x65; note++) {
+      // All channels (0-7 for track buttons, 0 for others)
+      if (note >= 0x30 && note <= 0x39) {
+        // Channel-based buttons (RECORD_ARM, SOLO, ACTIVATOR, etc. for tracks 1-8)
+        for (let channel = 0; channel < 8; channel++) {
+          this.setLED(note, ClipLEDColor.OFF, channel);
+        }
+      } else {
+        // Non-channel buttons
+        this.setLED(note, LEDState.OFF, 0);
+      }
+    }
+
+    // Reset all track level controllers (0x07 with channels 0-7)
+    for (let channel = 0; channel < 8; channel++) {
+      try {
+        (this.output as any).send('cc', {
+          controller: 0x07,
+          value: 0,
+          channel,
+        });
+      } catch (error) {
+        // Silently ignore errors during reset
+      }
+    }
+
+    // Reset master level and other global controllers
+    const globalControllers = [
+      0x0e, // MASTER_LEVEL
+      0x0f, // CROSSFADER
+      0x2f, // CUE_LEVEL
+    ];
+    globalControllers.forEach((controller) => {
+      try {
+        (this.output as any).send('cc', {
+          controller,
+          value: 0,
+          channel: 0,
+        });
+      } catch (error) {
+        // Silently ignore errors during reset
+      }
+    });
+
+    // Reset all device knobs (0x10-0x17)
+    for (let knob = 0x10; knob <= 0x17; knob++) {
+      try {
+        (this.output as any).send('cc', {
+          controller: knob,
+          value: 0,
+          channel: 0,
+        });
+      } catch (error) {
+        // Silently ignore errors during reset
+      }
+    }
+
+    // Reset all track knobs (0x30-0x37)
+    for (let knob = 0x30; knob <= 0x37; knob++) {
+      try {
+        (this.output as any).send('cc', {
+          controller: knob,
+          value: 0,
+          channel: 0,
+        });
+      } catch (error) {
+        // Silently ignore errors during reset
+      }
+    }
+
+    // Reset footswitches
+    [0x40, 0x43].forEach((controller) => {
+      try {
+        (this.output as any).send('cc', {
+          controller,
+          value: 0,
+          channel: 0,
+        });
+      } catch (error) {
+        // Silently ignore errors during reset
+      }
+    });
   }
 
   /**
