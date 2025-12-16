@@ -108,19 +108,75 @@ export class APC40 extends EventEmitter {
       return;
     }
 
-    // Turn off all LEDs (0x30 to 0x65 covers all LED notes)
-    for (let note = 0x30; note <= 0x65; note++) {
-      // All channels (0-7 for track buttons, 0 for others)
-      if (note >= 0x30 && note <= 0x39) {
-        // Channel-based buttons (RECORD_ARM, SOLO, ACTIVATOR, etc. for tracks 1-8)
-        for (let channel = 0; channel < 8; channel++) {
-          this.setLED(note, ClipLEDColor.OFF, channel);
+    // Turn off all channel-based LEDs (0x30-0x39) across all 8 channels
+    // Use noteon with velocity 0 (OFF) rather than noteoff
+    const channelBasedNotes = [
+      0x30, // RECORD_ARM
+      0x31, // SOLO
+      0x32, // ACTIVATOR
+      0x33, // TRACK_SELECTION
+      0x34, // CLIP_STOP
+      0x35, // CLIP_LAUNCH_1
+      0x36, // CLIP_LAUNCH_2
+      0x37, // CLIP_LAUNCH_3
+      0x38, // CLIP_LAUNCH_4
+      0x39, // CLIP_LAUNCH_5
+    ];
+
+    channelBasedNotes.forEach((note) => {
+      for (let channel = 0; channel < 8; channel++) {
+        try {
+          (this.output as any).send('noteon', {
+            note: note & 0x7f,
+            velocity: 0, // OFF
+            channel: channel & 0x0f,
+          });
+        } catch (error) {
+          // Silently ignore errors during reset
         }
-      } else {
-        // Non-channel buttons
-        this.setLED(note, LEDState.OFF, 0);
       }
-    }
+    });
+
+    // Turn off all non-channel LEDs
+    const globalNotes = [
+      0x3a, // CLIP_TRACK
+      0x3b, // DEVICE_ON_OFF
+      0x3e, // DETAIL_VIEW
+      0x50, // MASTER
+      0x51, // STOP_ALL_CLIPS
+      0x52, // SCENE_LAUNCH_1
+      0x53, // SCENE_LAUNCH_2
+      0x54, // SCENE_LAUNCH_3
+      0x55, // SCENE_LAUNCH_4
+      0x56, // SCENE_LAUNCH_5
+      0x57, // PAN
+      0x58, // SEND_A
+      0x59, // SEND_B
+      0x5a, // SEND_C
+      0x5b, // PLAY
+      0x5c, // STOP
+      0x5d, // RECORD
+      0x5e, // UP
+      0x5f, // DOWN
+      0x60, // RIGHT
+      0x61, // LEFT
+      0x62, // SHIFT
+      0x63, // TAP_TEMPO
+      0x64, // NUDGE_PLUS
+      0x65, // NUDGE_MINUS
+    ];
+
+    globalNotes.forEach((note) => {
+      try {
+        (this.output as any).send('noteon', {
+          note: note & 0x7f,
+          velocity: 0, // OFF
+          channel: 0,
+        });
+      } catch (error) {
+        // Silently ignore errors during reset
+      }
+    });
 
     // Reset all track level controllers (0x07 with channels 0-7)
     for (let channel = 0; channel < 8; channel++) {
