@@ -131,10 +131,8 @@ export class APC40 extends EventEmitter {
     try {
       this.output.send('sysex', bytes);
     } catch (error: any) {
-      // Silently catch errors from initialization or non-critical messages
-      if (error.message && !error.message.includes('sysex')) {
-        throw error;
-      }
+      // Log sysex errors for debugging
+      console.error('Sysex error:', error.message);
     }
   }
 
@@ -215,32 +213,76 @@ export class APC40 extends EventEmitter {
    * Set LED state
    */
   setLED(note: number, state: LEDState | number, channel: number = 0): void {
-    const msg = buildLEDOnMessage(note, state, channel);
-    this.sendRawMessage(msg);
+    if (!this.output) {
+      throw new Error('Not connected to APC40');
+    }
+
+    try {
+      (this.output as any).send('noteon', {
+        note: note & 0x7f,
+        velocity: state & 0x7f,
+        channel: channel & 0x0f,
+      });
+    } catch (error) {
+      console.error('Error setting LED:', error);
+    }
   }
 
   /**
    * Set clip launch LED color
    */
   setClipLED(note: number, color: ClipLEDColor, channel: number = 0): void {
-    const msg = buildLEDOnMessage(note, color, channel);
-    this.sendRawMessage(msg);
+    if (!this.output) {
+      throw new Error('Not connected to APC40');
+    }
+
+    try {
+      (this.output as any).send('noteon', {
+        note: note & 0x7f,
+        velocity: color & 0x7f,
+        channel: channel & 0x0f,
+      });
+    } catch (error) {
+      console.error('Error setting clip LED:', error);
+    }
   }
 
   /**
    * Turn off an LED
    */
   clearLED(note: number, channel: number = 0): void {
-    const msg = buildLEDOffMessage(note, channel);
-    this.sendRawMessage(msg);
+    if (!this.output) {
+      throw new Error('Not connected to APC40');
+    }
+
+    try {
+      (this.output as any).send('noteoff', {
+        note: note & 0x7f,
+        velocity: 0,
+        channel: channel & 0x0f,
+      });
+    } catch (error) {
+      console.error('Error clearing LED:', error);
+    }
   }
 
   /**
    * Set controller value (knob, fader, etc.)
    */
   setController(controlId: number, value: number, channel: number = 0): void {
-    const msg = buildControllerMessage(controlId, value, channel);
-    this.sendRawMessage(msg);
+    if (!this.output) {
+      throw new Error('Not connected to APC40');
+    }
+
+    try {
+      (this.output as any).send('cc', {
+        controller: controlId & 0x7f,
+        value: value & 0x7f,
+        channel: channel & 0x0f,
+      });
+    } catch (error) {
+      console.error('Error setting controller:', error);
+    }
   }
 
   /**
