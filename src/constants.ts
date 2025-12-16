@@ -190,8 +190,8 @@ export enum ControllerType {
   CUE_LEVEL = 'CUE_LEVEL',
 }
 
-// Button Input Notes (from device)
-export const INPUT_NOTES = {
+// Button codes (MIDI note values for button presses)
+export const BUTTONS = {
   RECORD_ARM: 0x30,
   SOLO: 0x31,
   ACTIVATOR: 0x32,
@@ -236,7 +236,7 @@ export const INPUT_NOTES = {
  * Helper function to get button name from note number
  */
 export function getButtonName(note: number): string {
-  for (const [name, value] of Object.entries(INPUT_NOTES)) {
+  for (const [name, value] of Object.entries(BUTTONS)) {
     if (value === note) {
       return name;
     }
@@ -249,73 +249,73 @@ export function getButtonName(note: number): string {
  */
 export function getButtonType(note: number): ButtonType | null {
   switch (note) {
-    case INPUT_NOTES.RECORD_ARM:
+    case BUTTONS.RECORD_ARM:
       return ButtonType.RECORD_ARM;
-    case INPUT_NOTES.SOLO:
+    case BUTTONS.SOLO:
       return ButtonType.SOLO;
-    case INPUT_NOTES.ACTIVATOR:
+    case BUTTONS.ACTIVATOR:
       return ButtonType.ACTIVATOR;
-    case INPUT_NOTES.TRACK_SELECTION:
+    case BUTTONS.TRACK_SELECTION:
       return ButtonType.TRACK_SELECTION;
-    case INPUT_NOTES.CLIP_STOP:
+    case BUTTONS.CLIP_STOP:
       return ButtonType.CLIP_STOP;
-    case INPUT_NOTES.CLIP_LAUNCH_1:
-    case INPUT_NOTES.CLIP_LAUNCH_2:
-    case INPUT_NOTES.CLIP_LAUNCH_3:
-    case INPUT_NOTES.CLIP_LAUNCH_4:
-    case INPUT_NOTES.CLIP_LAUNCH_5:
+    case BUTTONS.CLIP_LAUNCH_1:
+    case BUTTONS.CLIP_LAUNCH_2:
+    case BUTTONS.CLIP_LAUNCH_3:
+    case BUTTONS.CLIP_LAUNCH_4:
+    case BUTTONS.CLIP_LAUNCH_5:
       return ButtonType.CLIP_LAUNCH;
-    case INPUT_NOTES.CLIP_TRACK:
+    case BUTTONS.CLIP_TRACK:
       return ButtonType.CLIP_TRACK;
-    case INPUT_NOTES.DEVICE_ON_OFF:
+    case BUTTONS.DEVICE_ON_OFF:
       return ButtonType.DEVICE_ON_OFF;
-    case INPUT_NOTES.DETAIL_VIEW:
+    case BUTTONS.DETAIL_VIEW:
       return ButtonType.DETAIL_VIEW;
-    case INPUT_NOTES.REC_QUANT:
+    case BUTTONS.REC_QUANT:
       return ButtonType.REC_QUANT;
-    case INPUT_NOTES.MIDI_OVERDUB:
+    case BUTTONS.MIDI_OVERDUB:
       return ButtonType.MIDI_OVERDUB;
-    case INPUT_NOTES.METRONOME:
+    case BUTTONS.METRONOME:
       return ButtonType.METRONOME;
-    case INPUT_NOTES.MASTER:
+    case BUTTONS.MASTER:
       return ButtonType.MASTER;
-    case INPUT_NOTES.STOP_ALL_CLIPS:
+    case BUTTONS.STOP_ALL_CLIPS:
       return ButtonType.STOP_ALL_CLIPS;
-    case INPUT_NOTES.SCENE_LAUNCH_1:
-    case INPUT_NOTES.SCENE_LAUNCH_2:
-    case INPUT_NOTES.SCENE_LAUNCH_3:
-    case INPUT_NOTES.SCENE_LAUNCH_4:
-    case INPUT_NOTES.SCENE_LAUNCH_5:
+    case BUTTONS.SCENE_LAUNCH_1:
+    case BUTTONS.SCENE_LAUNCH_2:
+    case BUTTONS.SCENE_LAUNCH_3:
+    case BUTTONS.SCENE_LAUNCH_4:
+    case BUTTONS.SCENE_LAUNCH_5:
       return ButtonType.SCENE_LAUNCH;
-    case INPUT_NOTES.PAN:
+    case BUTTONS.PAN:
       return ButtonType.PAN;
-    case INPUT_NOTES.SEND_A:
+    case BUTTONS.SEND_A:
       return ButtonType.SEND_A;
-    case INPUT_NOTES.SEND_B:
+    case BUTTONS.SEND_B:
       return ButtonType.SEND_B;
-    case INPUT_NOTES.SEND_C:
+    case BUTTONS.SEND_C:
       return ButtonType.SEND_C;
-    case INPUT_NOTES.PLAY:
+    case BUTTONS.PLAY:
       return ButtonType.PLAY;
-    case INPUT_NOTES.STOP:
+    case BUTTONS.STOP:
       return ButtonType.STOP;
-    case INPUT_NOTES.RECORD:
+    case BUTTONS.RECORD:
       return ButtonType.RECORD;
-    case INPUT_NOTES.UP:
+    case BUTTONS.UP:
       return ButtonType.UP;
-    case INPUT_NOTES.DOWN:
+    case BUTTONS.DOWN:
       return ButtonType.DOWN;
-    case INPUT_NOTES.RIGHT:
+    case BUTTONS.RIGHT:
       return ButtonType.RIGHT;
-    case INPUT_NOTES.LEFT:
+    case BUTTONS.LEFT:
       return ButtonType.LEFT;
-    case INPUT_NOTES.SHIFT:
+    case BUTTONS.SHIFT:
       return ButtonType.SHIFT;
-    case INPUT_NOTES.TAP_TEMPO:
+    case BUTTONS.TAP_TEMPO:
       return ButtonType.TAP_TEMPO;
-    case INPUT_NOTES.NUDGE_PLUS:
+    case BUTTONS.NUDGE_PLUS:
       return ButtonType.NUDGE_PLUS;
-    case INPUT_NOTES.NUDGE_MINUS:
+    case BUTTONS.NUDGE_MINUS:
       return ButtonType.NUDGE_MINUS;
     default:
       return null;
@@ -327,19 +327,19 @@ export function getButtonType(note: number): ButtonType | null {
  */
 export function getButtonIndex(note: number): number | null {
   const clipLaunches = [
-    INPUT_NOTES.CLIP_LAUNCH_1,
-    INPUT_NOTES.CLIP_LAUNCH_2,
-    INPUT_NOTES.CLIP_LAUNCH_3,
-    INPUT_NOTES.CLIP_LAUNCH_4,
-    INPUT_NOTES.CLIP_LAUNCH_5,
+    BUTTONS.CLIP_LAUNCH_1,
+    BUTTONS.CLIP_LAUNCH_2,
+    BUTTONS.CLIP_LAUNCH_3,
+    BUTTONS.CLIP_LAUNCH_4,
+    BUTTONS.CLIP_LAUNCH_5,
   ];
 
   const sceneLaunches = [
-    INPUT_NOTES.SCENE_LAUNCH_1,
-    INPUT_NOTES.SCENE_LAUNCH_2,
-    INPUT_NOTES.SCENE_LAUNCH_3,
-    INPUT_NOTES.SCENE_LAUNCH_4,
-    INPUT_NOTES.SCENE_LAUNCH_5,
+    BUTTONS.SCENE_LAUNCH_1,
+    BUTTONS.SCENE_LAUNCH_2,
+    BUTTONS.SCENE_LAUNCH_3,
+    BUTTONS.SCENE_LAUNCH_4,
+    BUTTONS.SCENE_LAUNCH_5,
   ];
 
   const clipIndex = clipLaunches.indexOf(note);

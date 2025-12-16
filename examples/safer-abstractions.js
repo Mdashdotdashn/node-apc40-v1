@@ -8,7 +8,7 @@ const {
   LED_NOTES,
   ClipLEDColor,
   CONTROLLER_IDS,
-  INPUT_NOTES,
+  BUTTONS,
   ButtonType,
   ControllerType,
   getButtonType,

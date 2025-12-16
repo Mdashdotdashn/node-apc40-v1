@@ -2,7 +2,7 @@
  * Basic example of using the APC40 module
  */
 
-const { APC40, LED_NOTES, ClipLEDColor, CONTROLLER_IDS, INPUT_NOTES, getButtonName, getControllerName } = require('../lib');
+const { APC40, LED_NOTES, ClipLEDColor, CONTROLLER_IDS, BUTTONS, getButtonName, getControllerName } = require('../lib');
 
 console.log('Connecting to APC40...\n');
 
@@ -51,14 +51,14 @@ apc.on('button-down', (event) => {
   console.log(`Button pressed: ${buttonName} (0x${event.note.toString(16)}), Channel: ${event.channel}`);
 
   // Exit on STOP button
-  if (event.note === INPUT_NOTES.STOP) {
+  if (event.note === BUTTONS.STOP) {
     console.log('\nStop button pressed. Exiting...');
     apc.disconnect();
     process.exit(0);
   }
 
   // Toggle clip launch buttons - turn on if off, turn off if on
-  if (event.note >= INPUT_NOTES.CLIP_LAUNCH_1 && event.note <= INPUT_NOTES.CLIP_LAUNCH_5) {
+  if (event.note >= BUTTONS.CLIP_LAUNCH_1 && event.note <= BUTTONS.CLIP_LAUNCH_5) {
     const stateKey = `${event.note}-${event.channel}`;
     const isLit = clipLaunchStates.get(stateKey);
     
@@ -82,7 +82,7 @@ apc.on('button-up', (event) => {
   
   // Don't turn off clip launch buttons - they maintain their toggled state
   // Only turn off other momentary buttons
-  if (!(event.note >= INPUT_NOTES.CLIP_LAUNCH_1 && event.note <= INPUT_NOTES.CLIP_LAUNCH_5)) {
+  if (!(event.note >= BUTTONS.CLIP_LAUNCH_1 && event.note <= BUTTONS.CLIP_LAUNCH_5)) {
     apc.setClipLED(event.note, ClipLEDColor.OFF, event.channel);
   }
 });

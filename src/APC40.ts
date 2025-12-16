@@ -28,6 +28,12 @@ export interface ControllerEvent {
   channel: number;
 }
 
+export interface ClipLaunchEvent {
+  x: number; // Track column (0-7)
+  y: number; // Clip row (0-4)
+  pressed: boolean; // true for press, false for release
+}
+
 /**
  * Main APC40 controller class
  * 
@@ -310,6 +316,15 @@ export class APC40 extends EventEmitter {
         velocity,
         channel,
       } as ButtonEvent);
+
+      // Check if this is a clip launch button and emit high-level event
+      const clipLaunchEvent = this.getNoteAsClipLaunch(note, channel);
+      if (clipLaunchEvent) {
+        this.emit('clip-launch', {
+          ...clipLaunchEvent,
+          pressed: true,
+        } as ClipLaunchEvent);
+      }
     }
   }
 
@@ -326,6 +341,37 @@ export class APC40 extends EventEmitter {
       velocity,
       channel,
     } as ButtonEvent);
+
+    // Check if this is a clip launch button and emit high-level event
+    const clipLaunchEvent = this.getNoteAsClipLaunch(note, channel);
+    if (clipLaunchEvent) {
+      this.emit('clip-launch', {
+        ...clipLaunchEvent,
+        pressed: false,
+      } as ClipLaunchEvent);
+    }
+  }
+
+  /**
+   * Convert note and channel to clip launch grid coordinates if applicable
+   * Returns {x, y} where x is track (0-7) and y is clip (0-4), or null if not a clip launch button
+   */
+  private getNoteAsClipLaunch(
+    note: number,
+    channel: number
+  ): { x: number; y: number } | null {
+    // CLIP_LAUNCH_1 = 0x35, CLIP_LAUNCH_2 = 0x36, ..., CLIP_LAUNCH_5 = 0x39
+    const CLIP_LAUNCH_START = 0x35;
+    const CLIP_LAUNCH_END = 0x39;
+
+    if (note >= CLIP_LAUNCH_START && note <= CLIP_LAUNCH_END) {
+      return {
+        x: channel, // Track (0-7)
+        y: note - CLIP_LAUNCH_START, // Clip (0-4)
+      };
+    }
+
+    return null;
   }
 
   /**
@@ -419,6 +465,34 @@ export class APC40 extends EventEmitter {
       });
     } catch (error) {
       console.error('Error setting clip LED:', error);
+    }
+  }
+
+  /**
+   * Set clip launch LED color using grid coordinates
+   * @param x Track column (0-7)
+   * @param y Clip row (0-4)
+   * @param color LED color value
+   */
+  setClipLaunchColor(x: number, y: number, color: ClipLEDColor): void {
+    if (!this.output) {
+      throw new Error('Not connected to APC40');
+    }
+
+    // Map grid coordinates to MIDI note and channel
+    // y (0-4) maps to notes 0x35-0x39
+    // x (0-7) maps to channels 0-7
+    const note = 0x35 + (y & 0x04);
+    const channel = x & 0x07;
+
+    try {
+      (this.output as any).send('noteon', {
+        note: note & 0x7f,
+        velocity: color & 0x7f,
+        channel: channel & 0x0f,
+      });
+    } catch (error) {
+      console.error('Error setting clip launch LED:', error);
     }
   }
 

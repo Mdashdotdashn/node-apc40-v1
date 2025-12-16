@@ -1,4 +1,4 @@
-export { APC40, APC40Options, ButtonEvent, ControllerEvent } from './APC40';
+export { APC40, APC40Options, ButtonEvent, ControllerEvent, ClipLaunchEvent } from './APC40';
 export {
   APC40Mode,
   ClipLEDColor,
@@ -6,7 +6,7 @@ export {
   LEDState,
   LED_NOTES,
   CONTROLLER_IDS,
-  INPUT_NOTES,
+  BUTTONS,
   PROTOCOL,
   MESSAGE_TYPES,
   ButtonType,
