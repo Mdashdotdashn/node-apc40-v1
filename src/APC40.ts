@@ -31,14 +31,18 @@ export interface ControllerEvent {
 /**
  * Main APC40 controller class
  * 
- * NOTE: Always uses GENERIC mode to avoid Ableton's automatic handling
- * which could cause unexpected behavior. See initialize() method.
+ * NOTE: Always uses ALTERNATE_ABLETON mode for maximum API consistency.
+ * This mode provides:
+ * - ALL buttons as momentary (simpler, more consistent behavior)
+ * - ALL LEDs (including rings) controlled by the host
+ * - NO firmware-managed banking or special cases
+ * See initialize() method.
  */
 export class APC40 extends EventEmitter {
   private input?: midi.Input;
   private output?: midi.Output;
   private deviceName: string;
-  private readonly mode: APC40Mode = APC40Mode.GENERIC;
+  private readonly mode: APC40Mode = APC40Mode.ALTERNATE_ABLETON;
   private isConnected: boolean = false;
 
   constructor(options: APC40Options = {}) {
