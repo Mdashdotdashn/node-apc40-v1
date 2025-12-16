@@ -9,7 +9,13 @@ export {
   INPUT_NOTES,
   PROTOCOL,
   MESSAGE_TYPES,
+  ButtonType,
+  TrackButtonState,
+  ControllerType,
   getButtonName,
+  getButtonType,
+  getButtonIndex,
   getControllerName,
+  getControllerType,
 } from './constants';
 export * from './utils';
