@@ -2,6 +2,11 @@
 
 A simple Node.js module for controlling the Akai APC40 MIDI controller, inspired by [launchpad-midi](https://github.com/ojdon/launchpad-midi).
 
+## Requirements
+
+- **Node.js 14.15+** (required by easymidi dependency)
+- APC40 MIDI controller connected via USB
+
 ## Installation
 
 ```bash
