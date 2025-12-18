@@ -482,7 +482,7 @@ export class APC40 extends EventEmitter {
     // Map grid coordinates to MIDI note and channel
     // y (0-4) maps to notes 0x35-0x39
     // x (0-7) maps to channels 0-7
-    const note = 0x35 + (y & 0x04);
+    const note = 0x35 + y;
     const channel = x & 0x07;
 
     try {
