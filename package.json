@@ -1,5 +1,5 @@
 {
-  "name": "apc40-midi",
+  "name": "node-apc40-v1",
   "version": "0.1.0",
   "description": "Node.js module for Akai APC40 MIDI controller",
   "main": "lib/index.js",

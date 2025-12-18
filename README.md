@@ -10,13 +10,13 @@ A simple Node.js module for controlling the Akai APC40 MIDI controller, inspired
 ## Installation
 
 ```bash
-npm install apc40-midi
+npm install node-apc40-v1
 ```
 
 ## Quick Start
 
 ```javascript
-const { APC40, LED_NOTES, ClipLEDColor } = require('apc40-midi');
+const { APC40, LED_NOTES, ClipLEDColor } = require('node-apc40-v1');
 
 const apc = new APC40();
 
