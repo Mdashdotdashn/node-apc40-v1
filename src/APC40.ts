@@ -1,3 +1,6 @@
+
+
+
 import { EventEmitter } from 'events';
 import * as midi from 'easymidi';
 import { APC40Mode, ClipLEDColor, LEDRingType, LEDState } from './constants';
@@ -10,6 +13,7 @@ import {
   parseNoteMessage,
   parseControllerMessage,
 } from './utils';
+
 
 export interface APC40Options {
   deviceName?: string;
@@ -45,11 +49,45 @@ export interface ClipLaunchEvent {
  * See initialize() method.
  */
 export class APC40 extends EventEmitter {
+  /**
+   * Set a record LED by index (0-7) and boolean state
+   * @param index Track index (0-7)
+   * @param on true to turn on, false to turn off
+   * @param channel Optional MIDI channel (defaults to index)
+   */
+  setRecordLED(index: number, on: boolean, channel?: number): void {
+    if (index < 0 || index > 7) throw new Error('Record index out of range (0-7)');
+    const note = 0x30; // RECORD_ARM
+    this.setLED(note, on ? 1 : 0, channel !== undefined ? channel : index);
+  }
+  /**
+   * Set a solo LED by index (0-7) and boolean state
+   * @param index Track index (0-7)
+   * @param on true to turn on, false to turn off
+   * @param channel Optional MIDI channel (defaults to index)
+   */
+  setSoloLED(index: number, on: boolean, channel?: number): void {
+    if (index < 0 || index > 7) throw new Error('Solo index out of range (0-7)');
+    const note = 0x31; // SOLO
+    this.setLED(note, on ? 1 : 0, channel !== undefined ? channel : index);
+  }
   private input?: midi.Input;
   private output?: midi.Output;
   private deviceName: string;
   private readonly mode: APC40Mode = APC40Mode.ALTERNATE_ABLETON;
   private isConnected: boolean = false;
+
+  /**
+   * Set an activator LED by index (0-7) and boolean state
+   * @param index Track index (0-7)
+   * @param on true to turn on, false to turn off
+   * @param channel Optional MIDI channel (defaults to index)
+   */
+  setActivatorLED(index: number, on: boolean, channel?: number): void {
+    if (index < 0 || index > 7) throw new Error('Activator index out of range (0-7)');
+    const note = 0x32; // ACTIVATOR
+    this.setLED(note, on ? 1 : 0, channel !== undefined ? channel : index);
+  }
 
   constructor(options: APC40Options = {}) {
     super();
@@ -306,9 +344,20 @@ export class APC40 extends EventEmitter {
    * Handle note on message
    */
   private handleNoteOn(msg: any): void {
+
     const note = msg.note?.number ?? msg.note ?? 0;
     const velocity = msg.velocity ?? msg.velocity ?? 0;
     const channel = msg.channel ?? 0;
+
+    // Emit record event if relevant
+    if (note === 0x30 && channel >= 0 && channel < 8) {
+      this.emit('record', { index: channel, pressed: true });
+    }
+
+    // Emit solo event if relevant
+    if (note === 0x31 && channel >= 0 && channel < 8) {
+      this.emit('solo', { index: channel, pressed: true });
+    }
 
     if (velocity > 0) {
       this.emit('button-down', {
@@ -316,6 +365,11 @@ export class APC40 extends EventEmitter {
         velocity,
         channel,
       } as ButtonEvent);
+
+      // Emit activator event if relevant
+      if (note === 0x32 && channel >= 0 && channel < 8) {
+        this.emit('activator', { index: channel, pressed: true });
+      }
 
       // Check if this is a clip launch button and emit high-level event
       const clipLaunchEvent = this.getNoteAsClipLaunch(note, channel);
@@ -332,15 +386,31 @@ export class APC40 extends EventEmitter {
    * Handle note off message
    */
   private handleNoteOff(msg: any): void {
+
     const note = msg.note?.number ?? msg.note ?? 0;
     const velocity = msg.velocity ?? msg.velocity ?? 0;
     const channel = msg.channel ?? 0;
+
+    // Emit record event if relevant
+    if (note === 0x30 && channel >= 0 && channel < 8) {
+      this.emit('record', { index: channel, pressed: false });
+    }
+
+    // Emit solo event if relevant
+    if (note === 0x31 && channel >= 0 && channel < 8) {
+      this.emit('solo', { index: channel, pressed: false });
+    }
 
     this.emit('button-up', {
       note,
       velocity,
       channel,
     } as ButtonEvent);
+
+    // Emit activator event if relevant
+    if (note === 0x32 && channel >= 0 && channel < 8) {
+      this.emit('activator', { index: channel, pressed: false });
+    }
 
     // Check if this is a clip launch button and emit high-level event
     const clipLaunchEvent = this.getNoteAsClipLaunch(note, channel);

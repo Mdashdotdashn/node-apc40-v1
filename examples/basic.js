@@ -74,6 +74,7 @@ apc.on('button-down', (event) => {
       console.log(`  → Clip ON`);
     }
   }
+
 });
 
 apc.on('button-up', (event) => {

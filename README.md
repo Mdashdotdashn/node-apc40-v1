@@ -1,3 +1,51 @@
+#### `setRecordLED(index: number, on: boolean, channel?: number): void`
+Set a record arm LED by track index (0-7) and boolean state. Turns the LED on or off for the given track.
+#### `record`
+Emitted when a record arm button is pressed or released.
+```typescript
+apc.on('record', (event: { index: number, pressed: boolean }) => {
+  // event.index: track index (0-7)
+  // event.pressed: true for press, false for release
+});
+```
+**Example: Toggle record arm LEDs on press**
+```javascript
+const { APC40, BUTTONS } = require('node-apc40-v1');
+const apc = new APC40();
+const recordStates = new Array(8).fill(false);
+
+apc.on('record', (event) => {
+  if (event.pressed) {
+    recordStates[event.index] = !recordStates[event.index];
+    apc.setRecordLED(event.index, recordStates[event.index]);
+    console.log(`Record ${event.index + 1} is now ${recordStates[event.index] ? 'ON' : 'OFF'}`);
+  }
+});
+```
+#### `setSoloLED(index: number, on: boolean, channel?: number): void`
+Set a solo LED by track index (0-7) and boolean state. Turns the LED on or off for the given track.
+#### `solo`
+Emitted when a solo button is pressed or released.
+```typescript
+apc.on('solo', (event: { index: number, pressed: boolean }) => {
+  // event.index: track index (0-7)
+  // event.pressed: true for press, false for release
+});
+```
+**Example: Toggle solo LEDs on press**
+```javascript
+const { APC40, BUTTONS } = require('node-apc40-v1');
+const apc = new APC40();
+const soloStates = new Array(8).fill(false);
+
+apc.on('solo', (event) => {
+  if (event.pressed) {
+    soloStates[event.index] = !soloStates[event.index];
+    apc.setSoloLED(event.index, soloStates[event.index]);
+    console.log(`Solo ${event.index + 1} is now ${soloStates[event.index] ? 'ON' : 'OFF'}`);
+  }
+});
+```
 # APC40 MIDI
 
 A simple Node.js module for controlling the Akai APC40 MIDI controller, inspired by [launchpad-midi](https://github.com/ojdon/launchpad-midi).
@@ -65,8 +113,20 @@ Manually connect to the APC40 device. Returns `true` on success.
 #### `disconnect(): void`
 Disconnect from the device.
 
+
 #### `setLED(note: number, state: LEDState, channel?: number): void`
 Set an LED to a simple on/off state.
+
+#### `setActivatorLED(index: number, on: boolean, channel?: number): void`
+Set an activator LED by track index (0-7) and boolean state. Turns the LED on or off for the given track.
+#### `activator`
+Emitted when an activator button is pressed or released.
+```typescript
+apc.on('activator', (event: { index: number, pressed: boolean }) => {
+  // event.index: track index (0-7)
+  // event.pressed: true for press, false for release
+});
+```
 
 #### `setClipLED(note: number, color: ClipLEDColor, channel?: number): void`
 Set a clip launch LED to a specific color (useful for CLIP_LAUNCH buttons).
@@ -167,9 +227,25 @@ Use `APC40Mode` enum:
 
 ## Examples
 
+
 See the `examples/` directory for more detailed usage:
-- `basic.js` - Simple button and controller example
+- `basic.js` - Simple button, controller, and activator LED toggle example
 - `interactive.js` - Interactive mode with light testing
+
+**Example: Toggle activator LEDs on press**
+```javascript
+const { APC40, BUTTONS } = require('node-apc40-v1');
+const apc = new APC40();
+const activatorStates = new Array(8).fill(false);
+
+apc.on('activator', (event) => {
+  if (event.pressed) {
+    activatorStates[event.index] = !activatorStates[event.index];
+    apc.setActivatorLED(event.index, activatorStates[event.index]);
+    console.log(`Activator ${event.index + 1} is now ${activatorStates[event.index] ? 'ON' : 'OFF'}`);
+  }
+});
+```
 
 Run an example:
 ```bash
