@@ -452,6 +452,15 @@ export class APC40 extends EventEmitter {
     const value = msg.value ?? 0;
     const channel = msg.channel ?? 0;
 
+    // Emit 'slider' event for volume faders (track and master)
+    // Track faders: controlId == 0x07, channel 0-7 (index 0-7)
+    // Master fader: controlId == 0x0e, channel 0 (index 8)
+    if (controlId === 0x07 && channel >= 0 && channel < 8) {
+      this.emit('slider', { index: channel, value });
+    } else if (controlId === 0x0e && channel === 0) {
+      this.emit('slider', { index: 8, value });
+    }
+
     this.emit('controller', {
       controlId,
       value,
